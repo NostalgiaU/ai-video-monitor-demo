@@ -16,3 +16,6 @@ services:
     entrypoint: ["bash", "/scripts/push-streams.sh", "zlm:1935", "8"]
     volumes:
       - ./scripts:/scripts:ro
+      - ./public/cameras:/videos:ro
+    environment:
+      VIDEO_DIR: /videos

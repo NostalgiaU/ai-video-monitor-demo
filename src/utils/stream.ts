@@ -8,11 +8,8 @@ export function liveUrl(camera: Camera, protocol: StreamProtocol, host: string) 
   return `${schema}://${host}/live/${camera.streamId}.live.flv`;
 }
 
-const clipIndex = (camera: Camera) => (Number(camera.streamId.slice(3)) - 1) % 3;
-
-/** 演示模式（无流媒体服务时，例如线上静态部署）使用本地 MP4 循环模拟直播 */
-export const demoUrl = (camera: Camera) =>
-  `${import.meta.env.BASE_URL}records/clip0${clipIndex(camera) + 1}.mp4`;
+/** 演示模式（无流媒体服务时，例如线上静态部署）直接循环播放与推流相同的点位素材 */
+export const demoUrl = (camera: Camera) => `${import.meta.env.BASE_URL}cameras/${camera.streamId}.mp4`;
 
 export const recordHlsUrl = (clip: number) => `${import.meta.env.BASE_URL}records/clip0${clip + 1}/index.m3u8`;
 export const RECORD_CLIP_COUNT = 3;

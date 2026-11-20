@@ -3,7 +3,7 @@
 在线演示：https://nostalgiau.github.io/ai-video-monitor-demo/ （演示模式）
 
 面向制造业安全生产场景的 AI 视频分析平台 Web 端演示项目，覆盖 **实时视频墙、录像回放、告警中心与处置流程、人员检索与轨迹回放、安全值守大屏**。
-视频与告警数据为本地模拟数据（FFmpeg 生成测试流、程序化生成抓拍图），重点展示流媒体接入、播放器生命周期管理、大数据量渲染和可视化能力。
+视频使用真实工厂/工地场景素材（FFmpeg 循环推流模拟 8 路摄像头），告警与抓拍为本地模拟数据，重点展示流媒体接入、播放器生命周期管理、大数据量渲染和可视化能力。
 
 ![视频墙](docs/wall.png)
 
@@ -24,7 +24,7 @@
 
 ```
  摄像头 / NVR ──RTSP/GB28181──┐
- FFmpeg 模拟 8 路 ──RTMP──────┼─▶ ZLMediaKit ──WS-FLV / HTTP-FLV──▶ mpegts.js  视频墙（低延迟直播）
+ FFmpeg 推 8 路素材 ──RTMP────┼─▶ ZLMediaKit ──WS-FLV / HTTP-FLV──▶ mpegts.js  视频墙（低延迟直播）
                               │               └─HLS──────────────▶ hls.js     录像回放
  算法服务 ──告警事件(WebSocket)─┴────────────────────────────────▶ 告警中心 / 大屏 / 检测框叠加
 ```
@@ -92,7 +92,8 @@ src/
   mock/         设备/告警/录像/抓拍图模拟数据（固定随机种子）
   utils/        取流地址规则、格式化
 scripts/        push-streams.sh 模拟摄像头推流
-public/records  录像回放用 MP4 / HLS 切片
+public/cameras  8 路点位视频素材（推流 & 演示模式共用）
+public/records  录像回放用 HLS 切片
 ```
 
 ## 部署
@@ -106,3 +107,15 @@ public/records  录像回放用 MP4 / HLS 切片
 | ![](docs/playback.png) | ![](docs/alarms.png) |
 | **人员检索** | **值守大屏** |
 | ![](docs/search.png) | ![](docs/dashboard.png) |
+
+## 素材来源
+
+视频素材来自 [Mixkit](https://mixkit.co/)，已转码为 640×360 H.264，仅用于本个人非商业作品展示，不是真实监控采集数据。
+除 1457 号为 Stock Video Free License 外，其余均为 [Mixkit Stock Video Restricted License](https://mixkit.co/license/#videoRestricted)（仅限个人/非商业用途），请勿用于商业项目。
+
+| 用途 | Mixkit 素材 ID |
+|---|---|
+| 实时点位 cam01–cam08 | 22032、23378、46753、31473、14785、20770、45848、47755 |
+| 录像 clip01 | 22032、23378、21795、47755 |
+| 录像 clip02 | 46753、31473、1457、24127 |
+| 录像 clip03 | 14785、20770、45848、23551 |
