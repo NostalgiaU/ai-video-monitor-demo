@@ -18,7 +18,8 @@ import { cameraMap, cameras } from '../mock/devices';
 import { ALARM_TYPES, LEVEL_META } from '../mock/alarms';
 import { recordSegments } from '../mock/records';
 import { useAppStore } from '../store';
-import { RECORD_CLIP_COUNT, RECORD_CLIP_SECONDS, recordHlsUrl } from '../utils/stream';
+import { RECORD_CLIP_COUNT, RECORD_CLIP_SECONDS, detectionUrl, recordHlsUrl } from '../utils/stream';
+import DetectionOverlay from '../components/VideoPlayer/DetectionOverlay';
 import { downloadDataUrl, fmtTime } from '../utils/format';
 
 const SPEEDS = [0.5, 1, 2, 4, 8];
@@ -58,6 +59,7 @@ export default function Playback() {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [zoom, setZoom] = useState(3);
+  const [activeClip, setActiveClip] = useState(-1);
 
   useEffect(() => {
     const video = videoRef.current!;
@@ -81,6 +83,7 @@ export default function Playback() {
       video.currentTime = offset;
     } else {
       clipRef.current = clip;
+      setActiveClip(clip);
       pendingOffsetRef.current = offset;
       if (hlsRef.current) hlsRef.current.loadSource(recordHlsUrl(clip));
       else video.src = recordHlsUrl(clip);
@@ -185,6 +188,7 @@ export default function Playback() {
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
           />
+          {activeClip >= 0 && records.length > 0 && <DetectionOverlay videoRef={videoRef} src={detectionUrl(`clip0${activeClip + 1}`)} />}
           <div className="mono" style={{ position: 'absolute', left: 12, top: 10, padding: '4px 10px', background: 'rgba(0,0,0,.55)', borderRadius: 4, fontSize: 13 }}>
             {camera.name} · {fmtTime(abs)} {speed !== 1 && <Tag color="gold" style={{ marginLeft: 6 }}>{speed}x</Tag>}
           </div>

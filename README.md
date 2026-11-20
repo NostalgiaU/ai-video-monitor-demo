@@ -39,7 +39,9 @@
 - **资源回收**：`IntersectionObserver` + `visibilitychange`，窗口滚出可视区或页面切到后台时 `destroy()` 播放器、断开连接，回来后重新拉流，避免多路解码导致内存/CPU 飙升。
 - **断线重连**：指数退避（1s → 15s），每路显示延迟 / 帧率 / 码率 / 丢帧。
 - **连接数**：默认用 WS-FLV，规避浏览器同域 HTTP/1.1 最多 6 个长连接的限制（HTTP-FLV 16 路会卡住）。
-- Canvas 叠加 AI 检测框（人员、安全帽、叉车等）。
+- Canvas 叠加 AI 检测框：检测结果由 `scripts/detect.py` 离线跑 YOLO11m（人员/车辆 + ByteTrack 跟踪）与安全帽模型生成，存为 `public/detections/*.json`；前端按视频时间取帧、按 trackId 插值，并换算 `object-fit: contain` 的实际画面区域绘制。
+  - 演示模式/录像回放：直接用 `video.currentTime` 对齐。
+  - 实时流：推流脚本在 `epoch % 素材时长 == 0` 时开始循环推送，前端用 `(当前时间 - 缓冲延迟 - 链路延迟) % 时长` 换算画面位置。生产环境一般由算法服务通过 WebSocket 推送或 SEI 携带框坐标，再按 PTS 对齐。
 
 ### 2. 录像回放 `src/pages/Playback.tsx` `src/components/Timeline.tsx`
 - Canvas 自绘 24h 时间轴：录像段 / 告警段着色，**拖拽平移、滚轮缩放（24h → 20min）**、点击定位，高 DPI 适配。
@@ -94,6 +96,7 @@ src/
 scripts/        push-streams.sh 模拟摄像头推流
 public/cameras  8 路点位视频素材（推流 & 演示模式共用）
 public/records  录像回放用 HLS 切片
+public/detections  离线 YOLO 检测结果（逐帧检测框）
 ```
 
 ## 部署
@@ -109,6 +112,8 @@ public/records  录像回放用 HLS 切片
 | ![](docs/search.png) | ![](docs/dashboard.png) |
 
 ## 素材来源
+
+检测模型：[Ultralytics YOLO11m](https://github.com/ultralytics/ultralytics)（COCO）、[keremberke/yolov8m-hard-hat-detection](https://huggingface.co/keremberke/yolov8m-hard-hat-detection)，仅用于离线生成演示数据，未随仓库分发。
 
 视频素材来自 [Mixkit](https://mixkit.co/)，已转码为 640×360 H.264，仅用于本个人非商业作品展示，不是真实监控采集数据。
 除 1457 号为 Stock Video Free License 外，其余均为 [Mixkit Stock Video Restricted License](https://mixkit.co/license/#videoRestricted)（仅限个人/非商业用途），请勿用于商业项目。

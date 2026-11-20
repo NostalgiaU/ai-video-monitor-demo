@@ -5,10 +5,9 @@ import { CameraOutlined, CloseOutlined, LoadingOutlined, ReloadOutlined } from '
 import type { Camera } from '../../mock/devices';
 import { useAppStore } from '../../store';
 import { useInViewport } from '../../hooks/useInViewport';
-import { demoUrl, liveUrl } from '../../utils/stream';
+import { demoUrl, detectionUrl, liveUrl } from '../../utils/stream';
 import { downloadDataUrl } from '../../utils/format';
-import { hashString } from '../../mock/random';
-import DetectionOverlay from './DetectionOverlay';
+import DetectionOverlay, { type DetectionTrack } from './DetectionOverlay';
 import styles from './VideoPlayer.module.css';
 
 export type PlayerStatus = 'idle' | 'loading' | 'playing' | 'reconnecting' | 'offline';
@@ -32,6 +31,18 @@ const JUMP_LATENCY = 2.5;
 /** 超过该延迟（秒）时加速播放平滑追帧 */
 const CHASE_LATENCY = 1.2;
 const TARGET_LATENCY = 0.4;
+/** 推流编码 + 服务转发的大致耗时（秒），用于直播画面与检测结果对齐 */
+const PIPELINE_DELAY = 0.3;
+
+/**
+ * 推流脚本在 epoch % 素材时长 == 0 时开始循环推送，
+ * 因此当前直播画面在素材中的位置 ≈ (当前时间 - 端到端延迟) % 素材时长。
+ */
+function liveClipTime(video: HTMLVideoElement, track: DetectionTrack) {
+  const buffered = video.buffered.length ? video.buffered.end(video.buffered.length - 1) - video.currentTime : 0;
+  const t = Date.now() / 1000 - buffered - PIPELINE_DELAY;
+  return ((t % track.duration) + track.duration) % track.duration;
+}
 
 export default function VideoPlayer({ camera, showDetection, onClose, onStats }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -169,7 +180,9 @@ export default function VideoPlayer({ camera, showDetection, onClose, onStats }:
   return (
     <div ref={wrapRef} className={styles.player}>
       <video ref={videoRef} className={styles.video} muted playsInline />
-      {status === 'playing' && showDetection && <DetectionOverlay seed={hashString(camera.id)} />}
+      {status === 'playing' && showDetection && (
+        <DetectionOverlay videoRef={videoRef} src={detectionUrl(camera.streamId)} getTime={mode === 'live' ? liveClipTime : undefined} />
+      )}
       <div className={styles.topBar}>
         <span className={styles.title}>
           <i className={styles.dot} data-status={status} />
