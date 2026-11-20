@@ -129,7 +129,7 @@ export default function App() {
           <Button icon={<SettingOutlined />}>取流设置</Button>
         </Popover>
         <Tooltip title="源码">
-          <Button type="text" icon={<GithubOutlined />} href={import.meta.env.VITE_REPO_URL || 'https://github.com/'} target="_blank" />
+          <Button type="text" icon={<GithubOutlined />} href={import.meta.env.VITE_REPO_URL || 'https://github.com/NostalgiaU/ai-video-monitor-demo'} target="_blank" />
         </Tooltip>
       </Header>
       <Layout style={{ minHeight: 0, overflow: 'hidden' }}>
