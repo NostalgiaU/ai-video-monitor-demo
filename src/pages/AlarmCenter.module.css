@@ -1,0 +1,7 @@
+.header, .row { display: grid; align-items: center; gap: 12px; padding: 0 16px; }
+.header { height: 40px; color: #8ea2bf; font-size: 13px; border-bottom: 1px solid #1d2a40; background: #0e1626; border-radius: 8px 8px 0 0; }
+.row { height: 68px; border-bottom: 1px solid #172338; font-size: 13px; cursor: pointer; transition: background 0.15s; }
+.row:hover { background: #15223a; }
+.row[data-new='true'] { animation: flash 2s ease-out; }
+.ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@keyframes flash { from { background: rgba(255, 77, 79, 0.35); } to { background: transparent; } }

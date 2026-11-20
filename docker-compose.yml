@@ -1,0 +1,18 @@
+# 一键启动本地流媒体环境：ZLMediaKit + 8 路 FFmpeg 模拟摄像头
+services:
+  zlm:
+    image: zlmediakit/zlmediakit:master
+    container_name: zlm
+    restart: unless-stopped
+    ports:
+      - "1935:1935"     # RTMP 推流
+      - "8080:80"       # HTTP-FLV / WS-FLV / HLS / API
+      - "8554:554"      # RTSP
+      - "8000:8000/udp" # WebRTC
+  cameras:
+    image: linuxserver/ffmpeg:latest
+    depends_on: [zlm]
+    restart: unless-stopped
+    entrypoint: ["bash", "/scripts/push-streams.sh", "zlm:1935", "8"]
+    volumes:
+      - ./scripts:/scripts:ro
